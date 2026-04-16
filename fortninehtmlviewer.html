@@ -1,0 +1,147 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>FortNine</title><script src="https://cdn.tailwindcss.com"></script><script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script><script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script><style>input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;width:100%;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:6px;background:#E2E8F0;border-radius:3px}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;height:22px;width:22px;border-radius:50%;background:#2563EB;margin-top:-8px;box-shadow:0 2px 6px rgba(0,0,0,0.25)}input[type=range]::-moz-range-track{height:6px;background:#E2E8F0;border-radius:3px}input[type=range]::-moz-range-thumb{height:22px;width:22px;border-radius:50%;background:#2563EB;border:none}.sP::-webkit-slider-thumb{background:#7C3AED}.sP::-moz-range-thumb{background:#7C3AED}.sP::-webkit-slider-runnable-track{background:#DDD6FE}.sP::-moz-range-track{background:#DDD6FE}</style></head><body class="bg-slate-50 text-slate-800 font-sans"><div id="root"></div><script type="text/babel">
+var useState=React.useState,useMemo=React.useMemo;
+var C={name:"FortNine",vol:240000000,aov:290,inc:"PayPal",iR:0.0185,iF:0.15,sBps:0.0018,sFee:0.10,icD:0.0115,icS:0.0140,icP:0.0204,gm:0.30,minDebit:10};
+var TX=C.vol/C.aov;
+function fm(v){return new Intl.NumberFormat("en-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(v)}
+function fk(v){return Math.abs(v)>=1e6?"$"+(v/1e6).toFixed(1)+"M":"$"+(v/1e3).toFixed(0)+"K"}
+function pc(v){return (v*100).toFixed(2)+"%"}
+function App(){
+  var ds=useState(15),dM=ds[0],setDM=ds[1];
+  var ss=useState(35),sM=ss[0],setSM=ss[1];
+  var a2=useState(1.0),aL=a2[0],setAL=a2[1];
+  var safeDM=Math.max(dM,C.minDebit);
+  var cS=Math.min(sM,100-safeDM);
+  var pM=Math.max(0,100-safeDM-cS);
+  var fin=useMemo(function(){
+    var V=C.vol,T=TX;
+    var dV=V*(safeDM/100),sV=V*(cS/100),pV=V*(pM/100);
+    var dT=T*(safeDM/100),sT=T*(cS/100),pT=T*(pM/100);
+    var inc=(V*C.iR)+(T*C.iF);
+    var str=(dV*(C.icD+C.sBps))+(dT*C.sFee)+(sV*(C.icS+C.sBps))+(sT*C.sFee)+(pV*(C.icP+C.sBps))+(pT*C.sFee);
+    var fS=inc-str,aR=V*(aL/100)*C.gm;
+    return{inc:inc,str:str,fS:fS,aR:aR,tot:fS+aR}
+  },[safeDM,cS,pM,aL]);
+  var ef=function(ic){return (ic+C.sBps)*100+(C.sFee/C.aov)*100};
+  var eD=ef(C.icD).toFixed(2),eS=ef(C.icS).toFixed(2),eP=ef(C.icP).toFixed(2),eF=(C.iR*100+(C.iF/C.aov)*100).toFixed(2);
+  var ppC=(C.aov*C.iR)+C.iF,txD=(C.aov*(C.icD+C.sBps))+C.sFee,txS=(C.aov*(C.icS+C.sBps))+C.sFee,txP=(C.aov*(C.icP+C.sBps))+C.sFee;
+  return(
+<div className="min-h-screen bg-slate-50 pb-16">
+<header className="bg-gradient-to-br from-slate-900 to-slate-800 text-white pt-12 pb-28 px-4 sm:px-6 lg:px-8">
+<div className="max-w-5xl mx-auto">
+<p className="text-orange-400 mb-4 font-semibold tracking-wide uppercase text-sm">Payment Strategy Analysis</p>
+<h1 className="text-4xl md:text-5xl font-extrabold mb-3">The Strategic Opportunity</h1>
+<p className="text-slate-400 text-lg mb-6">Interactive cost model: {C.inc} flat-rate vs Stripe IC+</p>
+<div className="flex flex-wrap gap-3 text-sm">
+<span className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">Merchant: <strong>{C.name}</strong></span>
+<span className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">Volume: <strong>~{fk(C.vol)} CAD</strong></span>
+<span className="bg-white/10 px-3 py-1.5 rounded-lg border border-white/10">AOV: <strong>${C.aov}</strong></span>
+</div></div></header>
+<main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-20 space-y-10">
+<div className="grid md:grid-cols-2 gap-4">
+<div className="bg-white rounded-xl shadow-md border border-slate-200 p-6">
+<h3 className="text-xs font-bold uppercase text-slate-400 mb-3">{C.inc} Flat Rate</h3>
+<div className="text-3xl font-black text-slate-800">{pc(C.iR)} <span className="text-lg font-normal text-slate-400">+ ${C.iF.toFixed(2)}/txn</span></div></div>
+<div className="bg-white rounded-xl shadow-md border border-blue-200 p-6">
+<h3 className="text-xs font-bold uppercase text-blue-500 mb-3">Stripe IC+</h3>
+<div className="text-3xl font-black text-blue-700">IC+{(C.sBps*10000).toFixed(0)}bps <span className="text-lg font-normal text-blue-400">+${C.sFee.toFixed(2)}/txn</span></div>
+<p className="text-xs text-slate-500 mt-2">Debit <strong>{pc(C.icD)}</strong> / Std <strong>{pc(C.icS)}</strong> / Prem <strong>{pc(C.icP)}</strong></p></div></div>
+
+<div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+<div className="p-6 md:p-8 border-b border-slate-100">
+<h2 className="text-2xl font-extrabold text-slate-900">TCO Simulator</h2>
+<p className="text-slate-500 mt-1">Drag sliders to model different scenarios.</p></div>
+<div className="p-6 md:p-8 grid lg:grid-cols-12 gap-10">
+<div className="lg:col-span-7 space-y-7">
+<div>
+<div className="flex justify-between items-end mb-2"><label className="text-xs font-bold text-slate-500 uppercase">Debit Mix</label><span className="text-3xl font-black text-blue-600">{safeDM}%</span></div>
+<input type="range" min={C.minDebit} max="100" step="1" value={safeDM} onChange={function(e){setDM(Number(e.target.value))}}/>
+<div className="flex justify-between text-[10px] text-slate-400 mt-1"><span>{C.minDebit}% Floor</span><span>100%</span></div></div>
+<div>
+<div className="flex justify-between items-end mb-2"><label className="text-xs font-bold text-slate-500 uppercase">Standard Credit Mix</label><span className="text-3xl font-black text-slate-600">{cS}%</span></div>
+<input type="range" min="0" max={100-safeDM} step="1" value={cS} onChange={function(e){setSM(Number(e.target.value))}}/>
+<div className="flex justify-between text-xs mt-2"><span className="text-slate-400">Premium (auto):</span><span className="font-bold text-amber-600">{pM}%</span></div></div>
+<div className="h-4 rounded-full overflow-hidden flex shadow-inner border border-slate-200">
+<div className="bg-green-500 transition-all duration-300" style={{width:safeDM+"%"}}></div>
+<div className="bg-blue-400 transition-all duration-300" style={{width:cS+"%"}}></div>
+<div className="bg-red-400 transition-all duration-300" style={{width:pM+"%"}}></div></div>
+<div className="flex gap-4 text-[10px] font-bold">
+<span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>Debit {safeDM}%</span>
+<span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block"></span>Std {cS}%</span>
+<span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span>Prem {pM}%</span></div>
+<div className="p-5 bg-purple-50 rounded-xl border border-purple-200">
+<div className="flex justify-between items-end mb-2"><label className="text-xs font-bold text-purple-800 uppercase">Auth Uplift</label><span className="text-3xl font-black text-purple-600">{aL.toFixed(1)}%</span></div>
+<input type="range" min="0" max="5" step="0.1" value={aL} onChange={function(e){setAL(Number(e.target.value))}} className="sP"/>
+<div className="flex justify-between text-[10px] text-purple-600/60 mt-1"><span>0%</span><span>Recovered rev x 30% margin</span></div></div></div>
+
+<div className="lg:col-span-5 flex flex-col bg-slate-50 rounded-xl p-6 border border-slate-200 shadow-inner">
+<div className="mb-4 pb-4 border-b border-slate-200">
+<h3 className="text-[10px] text-slate-400 font-bold uppercase mb-1">Current ({C.inc})</h3>
+<div className="text-xl font-bold text-slate-700">{fm(fin.inc)}</div></div>
+<div className="mb-4 pb-4 border-b border-slate-200">
+<h3 className="text-[10px] text-slate-400 font-bold uppercase mb-1">Projected (Stripe)</h3>
+<div className="text-2xl font-black text-slate-900">{fm(fin.str)}</div>
+<div className={fin.fS>=0?"text-sm font-semibold mt-1 text-green-600":"text-sm font-semibold mt-1 text-red-500"}>Fee Impact: {fin.fS>=0?"+":""}{fm(fin.fS)}</div></div>
+<div className="mb-4 pb-4 border-b border-slate-200">
+<h3 className="text-[10px] text-purple-500 font-bold uppercase mb-1">Auth Uplift Profit</h3>
+<div className="text-xl font-black text-purple-700">+{fm(fin.aR)}</div></div>
+<div className="mt-auto pt-3">
+<h3 className="text-xs font-bold uppercase mb-1">Total Annual ROI</h3>
+<div className={fin.tot>=0?"text-4xl md:text-5xl font-black text-green-600":"text-4xl md:text-5xl font-black text-red-600"}>{fin.tot>=0?"+":""}{fm(fin.tot)}</div></div></div></div></div>
+
+<div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+<h3 className="text-lg font-bold text-slate-800 mb-4">Per-Transaction Breakdown ({"$"+C.aov} order)</h3>
+<div className="grid grid-cols-4 gap-2 pb-2 border-b-2 border-slate-200 text-xs font-bold uppercase text-slate-400">
+<div>Card</div><div className="text-center">{C.inc}</div><div className="text-center">Stripe</div><div className="text-center">Save</div></div>
+{[["Debit",ppC,txD,"text-green-700"],["Std Credit",ppC,txS,"text-blue-700"],["Prem Credit",ppC,txP,"text-red-600"]].map(function(r){
+var l=r[0],i=r[1],s=r[2],col=r[3],d=i-s;
+return(<div key={l} className="grid grid-cols-4 gap-2 py-3 border-b border-slate-100 items-center text-sm">
+<div className="font-medium text-slate-700">{l}</div>
+<div className="text-center font-mono text-slate-500">{"$"+i.toFixed(2)}</div>
+<div className={"text-center font-mono font-bold "+col}>{"$"+s.toFixed(2)}</div>
+<div className={d>=0?"text-center font-bold text-green-600":"text-center font-bold text-red-500"}>{d>=0?"+":""}{fm(d)}</div></div>)})}</div>
+
+<div className="grid md:grid-cols-2 gap-8">
+<div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+<h3 className="text-lg font-bold text-slate-800 mb-4">Hidden Subsidy Trap</h3>
+<p className="text-slate-600 text-sm mb-6">Your flat rate ({pc(C.iR)}) hides two realities.</p>
+<div className="space-y-4">
+<div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+<h4 className="font-bold text-green-900 text-sm mb-2">Where You WIN</h4>
+<div className="flex justify-between text-sm mb-1"><span>Debit ({eD}%)</span><span className="font-bold text-green-700">Cheaper</span></div>
+<div className="flex justify-between text-sm"><span>Standard ({eS}%)</span><span className="font-bold text-green-700">Cheaper</span></div></div>
+<div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+<h4 className="font-bold text-red-900 text-sm mb-2">Where You PAY More</h4>
+<div className="flex justify-between text-sm"><span>Premium ({eP}%)</span><span className="font-bold text-red-700">More Expensive</span></div></div></div></div>
+<div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+<h3 className="text-lg font-bold text-slate-800 mb-6">Cost Visualization</h3>
+<div className="flex-1 flex items-end justify-center gap-6 px-2 pb-4 min-h-[220px]">
+<div className="w-1/4 flex flex-col items-center">
+<div className="text-xs font-bold text-slate-600 mb-2">{eF}%</div>
+<div className="w-full bg-slate-300 rounded-t-md" style={{height:"140px"}}></div>
+<div className="mt-3 text-xs font-bold text-slate-700">{C.inc}</div></div>
+<div className="w-1/2 flex flex-col items-center">
+<div className="w-full flex items-end gap-1" style={{height:"180px"}}>
+<div className="w-1/3 bg-green-500 rounded-t-md flex items-end justify-center pb-1" style={{height:"50%"}}><span className="text-[9px] text-white font-bold">Debit</span></div>
+<div className="w-1/3 bg-blue-400 rounded-t-md flex items-end justify-center pb-1" style={{height:"60%"}}><span className="text-[9px] text-white font-bold">Std</span></div>
+<div className="w-1/3 bg-red-500 rounded-t-md flex items-end justify-center pb-1" style={{height:"82%"}}><span className="text-[9px] text-white font-bold">Prem</span></div></div>
+<div className="flex w-full justify-between text-[10px] font-bold mt-1 px-1">
+<span className="text-green-700">{eD}%</span><span className="text-blue-700">{eS}%</span><span className="text-red-700">{eP}%</span></div>
+<div className="mt-2 text-xs font-bold text-blue-600">Stripe (IC+)</div></div></div></div></div>
+
+<div className="space-y-6 mb-8">
+<h2 className="text-2xl font-bold text-slate-900">Strategic Recommendations</h2>
+<div className="grid md:grid-cols-3 gap-6">
+<div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+<h3 className="font-bold text-slate-800 mb-2">1. Validate Credit Mix</h3>
+<p className="text-sm text-slate-600">If your mix skews toward standard cards (1.40% IC), savings increase immediately. Request a Card Type Breakdown report.</p></div>
+<div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-green-500">
+<h3 className="font-bold text-slate-800 mb-2">2. Debit Steering</h3>
+<p className="text-sm text-slate-600">Checkout design changes can drive users toward Interac/Debit. Every 1% shift saves thousands annually.</p></div>
+<div className="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500">
+<h3 className="font-bold text-slate-800 mb-2">3. Future-Proof Scale</h3>
+<p className="text-sm text-slate-600">As you grow past {fk(C.vol)}, Stripe markup drops. {C.inc} flat pricing does not scale with you.</p></div></div></div>
+</main>
+<footer className="max-w-5xl mx-auto px-6 py-8 text-center text-slate-400 text-xs">Confidential Analysis for {C.name}.</footer>
+</div>)}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script></body></html>
